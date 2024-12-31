@@ -1,13 +1,16 @@
-import os
 from urllib.parse import urlencode
 
 import httpx
 from fastapi.responses import JSONResponse
 
+from app.utils.enums import PlatformEnum
+from app.utils.mappers import platform_explorer_apikey_mapper, platform_explorer_mapper
+
 
 async def fetch_gas():
-    api_key = os.getenv("ETHERSCAN_API_KEY")
-    url = "https://api.etherscan.io/api"
+    api_key = platform_explorer_apikey_mapper[PlatformEnum.ETH]
+    route = platform_explorer_mapper[PlatformEnum.ETH]
+    url = f"https://{route}/api"
     params = {
         "module": "gastracker",
         "action": "gasoracle",

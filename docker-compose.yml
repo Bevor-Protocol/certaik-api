@@ -2,7 +2,8 @@ version: "3.8"
 
 services:
   api:
-    build: .
+    build:
+      context: .
     ports:
       - "8000:8000"
     environment:
@@ -14,6 +15,61 @@ services:
       - GAME_API_KEY=${GAME_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - REDIS_HOST=${REDIS_HOST}
+      - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
     volumes:
+      - ./poetry.lock:/app/poetry.lock
+      - ./pyproject.toml:/app/pyproject.toml
       - ./app:/app/app
     command: poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - redis
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    expose:
+      - 6379
+    command: redis-server --bind 0.0.0.0
+
+  worker:
+    build:
+      context: .
+    depends_on:
+      - redis
+    command: rq worker high low --url redis://redis:6379
+    environment:
+      - REPLICATE_API_KEY=${REPLICATE_API_KEY}
+      - REDIS_HOST=${REDIS_HOST}
+      - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
+    links:
+      - redis
+    volumes:
+      - ./poetry.lock:/app/poetry.lock
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./app:/app/app
+    restart: always
+
+volumes:
+  redis_data:
+  postgres_data:

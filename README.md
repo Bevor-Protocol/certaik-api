@@ -8,4 +8,10 @@ Install `poetry`
 
 `poetry install` will create your virtual environment
 
-`docker compose up` will start the instance
+`docker compose up` will start the services
+
+### Redis
+
+Redis queue is used for background processing, and to enable cron tasks.
+
+To observe the queue, `poetry shell` followed by `rq info`
