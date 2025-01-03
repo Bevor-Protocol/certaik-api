@@ -20,3 +20,8 @@ class NetworkTypeEnum(Enum):
 class AuditTypeEnum(Enum):
     SECURITY = "SECURITY"
     GAS = "GAS"
+
+class ModelTypeEnum(Enum):
+    LLAMA3 = "LLAMA3"
+    OPENAI = "OPENAI"
+    # Add Anthropic and custom GAME Llama3 Instance

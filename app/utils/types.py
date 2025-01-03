@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.utils.enums import AuditTypeEnum, PlatformEnum
+from app.utils.enums import AuditTypeEnum, PlatformEnum, ModelTypeEnum
 
 
 class EvalBody(BaseModel):
@@ -11,6 +11,7 @@ class EvalBody(BaseModel):
     network: Optional[PlatformEnum] = Field(default=None)
     audit_type: AuditTypeEnum = Field(default=AuditTypeEnum.GAS)
     encode_code: bool = Field(default=False)
+    model_type: ModelTypeEnum = Field(default=ModelTypeEnum.LLAMA3)
     as_markdown: bool = Field(default=False)
 
     @model_validator(mode="after")

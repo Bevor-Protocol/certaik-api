@@ -6,6 +6,8 @@ import re
 
 import httpx
 import replicate
+from openai import OpenAI
+from anthropic import Anthropic
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from rq import Retry
@@ -35,13 +37,41 @@ input_template = {
 }
 
 
-async def compute_eval(input_data, audit_type, as_markdown, encode_code):
-    client = replicate.Client(api_token=os.getenv("REPLICATE_API_KEY"))
+async def get_model_response(model_type, input_data):
+    model_response_map = {
+        "LLAMA3": lambda: replicate.Client(api_token=os.getenv("REPLICATE_API_KEY")).async_run(
+            "meta/meta-llama-3-70b-instruct", input=input_data
+        ),
+        "OPENAI": lambda: OpenAI(api_key=os.environ.get("OPENAI_API_KEY")).chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": input_data,
+                }
+            ],
+            model="gpt-o1",
+        ),
+        "CLAUDE": lambda: Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY")).messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": input_data,
+                }
+            ],
+            model="claude-3-5-sonnet-latest",
+        ),
+    }
 
-    # this model returns an iterator
-    response = await client.async_run(
-        "meta/meta-llama-3-70b-instruct", input=input_data
-    )
+    if model_type not in model_response_map:
+        raise ValueError(f"Unsupported model type: {model_type}")
+
+    response = await model_response_map[model_type]()
+    return response
+
+
+async def compute_eval(input_data, audit_type, as_markdown, encode_code, model_type):
+    response = await get_model_response(model_type, input_data)
 
     response_completed = ""
     for r in response:
@@ -102,6 +132,7 @@ async def process_evaluation(data: EvalBody) -> JSONResponse:
     network = data.network
     audit_type = data.audit_type
     encode_code = data.encode_code
+    model_type = data.model_type
     as_markdown = data.as_markdown
 
     if not contract_code:
@@ -149,6 +180,7 @@ async def process_evaluation(data: EvalBody) -> JSONResponse:
         audit_type,
         as_markdown,
         encode_code,
+        model_type,
         retry=Retry(max=2),
     )
 
