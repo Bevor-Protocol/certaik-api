@@ -17,7 +17,12 @@ from app.lib.v1.markdown.security import markdown as security_markdown
 # from app.lib.prompts.security import prompt as security_prompt
 from app.pydantic.request import EvalBody
 from app.pydantic.response import EvalResponse, EvalResponseData
-from app.utils.enums import AuditStatusEnum, AuditTypeEnum, ResponseStructureEnum
+from app.utils.enums import (
+    AuditProjectTypeEnum,
+    AuditStatusEnum,
+    AuditTypeEnum,
+    ResponseStructureEnum,
+)
 
 # from app.worker import process_eval
 
@@ -85,6 +90,20 @@ class EvalService:
 
         return result.format(**formatter)
 
+    async def add_agent_security_score(
+        self, audit: Audit, security_score: float
+    ) -> None:
+        """
+        Updates an audit record with agent security score and project type
+
+        Args:
+            audit: The Audit model instance to update
+            security_score: The security score to set
+        """
+        audit.project_type = AuditProjectTypeEnum.AGENT
+        audit.security_score = security_score
+        await audit.save()
+
     async def process_evaluation(self, user: UserDict, data: EvalBody) -> JSONResponse:
         if not await Contract.exists(id=data.contract_id):
             raise HTTPException(
@@ -104,6 +123,12 @@ class EvalService:
             user_id=user["user"].id,
             audit_type=audit_type,
         )
+
+        if (
+            data.security_score is not None
+            and data.project_type == AuditProjectTypeEnum.AGENT
+        ):
+            await self.add_agent_security_score(audit, data.security_score)
 
         redis_pool = await create_pool(redis_settings)
 

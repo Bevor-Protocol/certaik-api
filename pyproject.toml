@@ -17,6 +17,7 @@ openai = "^1.59.2"
 prometheus-client = "^0.21.1"
 arq = "^0.26.3"
 hypercorn = "^0.17.3"
+requests = "^2.32.3"
 
 [tool.poetry.dependencies.fastapi]
 extras = [

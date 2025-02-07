@@ -6,6 +6,7 @@ from tortoise.models import Model
 
 from app.utils.enums import (
     AppTypeEnum,
+    AuditProjectTypeEnum,
     AuditStatusEnum,
     AuditTypeEnum,
     ClientTypeEnum,
@@ -168,6 +169,10 @@ class Audit(AbstractModel):
     )
     model = fields.CharField(max_length=255, null=True, default=None)
     audit_type = fields.CharEnumField(enum_type=AuditTypeEnum)
+    project_type = fields.CharEnumField(
+        enum_type=AuditProjectTypeEnum, null=True, default=AuditProjectTypeEnum.PROTOCOL
+    )
+    security_score = fields.FloatField(null=True, default=None)
     processing_time_seconds = fields.IntField(null=True, default=None)
     status = fields.CharEnumField(
         enum_type=AuditStatusEnum, null=True, default=AuditStatusEnum.WAITING

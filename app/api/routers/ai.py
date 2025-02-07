@@ -23,7 +23,12 @@ class AiRouter:
             methods=["POST"],
             dependencies=[Depends(require_auth)],
         )
-        self.router.add_api_route("/eval/{id}", self.get_eval_by_id, methods=["GET"])
+        self.router.add_api_route(
+            "/eval/{id}",
+            self.get_eval_by_id,
+            methods=["GET"],
+            params={"add_agent_security_score": bool},
+        )
         # self.router.add_api_route(
         #     "/eval/webhook",
         #     self.process_webhook,
@@ -47,6 +52,10 @@ class AiRouter:
         response_type = request.query_params.get(
             "response_type", ResponseStructureEnum.JSON.name
         )
+        agent_security_score = (
+            request.query_params.get("add_agent_security_score", "false").lower()
+            == "true"
+        )
 
         try:
             response_type = ResponseStructureEnum._value2member_map_[response_type]
@@ -56,10 +65,32 @@ class AiRouter:
             )
 
         eval_service = EvalService()
-
         response = await eval_service.get_eval(id, response_type=response_type)
+        result = response.model_dump()["result"]["result"]
 
-        return JSONResponse(response.model_dump()["result"]["result"], status_code=200)
+        if agent_security_score:
+            from app.api.ai.agent_sec import AgentSecurityService
+
+            agent_service = AgentSecurityService()
+            try:
+                # Assuming twitter handle is available in the result
+                twitter_handle = result.get("twitter_handle")
+                if twitter_handle:
+                    score = agent_service.calculate_agent_sec_score(
+                        twitter_handle, 85.0
+                    )  # Default audit score
+                    result["agent_security_score"] = score
+                    result["project_type"] = "Agent"
+                else:
+                    result["agent_security_score"] = None
+                    result["project_type"] = "Protocol"
+            except Exception as e:
+                result["agent_security_score"] = None
+                result["project_type"] = "Agent"
+        else:
+            result["project_type"] = "Protocol"
+
+        return JSONResponse(result, status_code=200)
 
     # async def process_webhook(self, request: Request):
     #     """

@@ -36,6 +36,13 @@ class AuditTypeEnum(str, Enum):
     GAS = "gas"
 
 
+class AuditProjectTypeEnum(str, Enum):
+    AGENT = "agent"
+    PROTOCOL = "protocol"
+    TOKEN = "token"
+    NFT = "nft"
+
+
 class AuditStatusEnum(str, Enum):
     WAITING = "waiting"
     PROCESSING = "processing"
