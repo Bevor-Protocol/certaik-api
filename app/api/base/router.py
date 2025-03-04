@@ -1,7 +1,7 @@
 from arq import create_pool
 from fastapi import APIRouter, Response, status
 from fastapi.openapi.docs import get_redoc_html
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from tortoise import Tortoise
 
@@ -19,6 +19,7 @@ class BaseRouter:
         self.router.add_api_route("/metrics", self.get_metrics, methods=["GET"])
         self.router.add_api_route("/test", self.test, methods=["GET"])
         self.router.add_api_route("/docs", self.redoc, methods=["GET"])
+        self.router.add_api_route("/redoc", self.redirect_to_docs, methods=["GET"])
 
     async def read_root(self):
         return {"Hello": "World"}
@@ -46,6 +47,9 @@ class BaseRouter:
             title="BevorAI API - Docs",
             redoc_favicon_url="https://app.bevor.ai/favicon.ico",
         )
+
+    async def redirect_to_docs(self):
+        return RedirectResponse(url="/docs")
 
     async def get_metrics(self):
         return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)

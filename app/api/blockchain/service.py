@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -22,6 +23,35 @@ class BlockchainService:
 
             data = response.json()
             return data
+
+    def __parse_source_code(self, scan_results: list[dict]):
+        """
+        Etherscan response object can be a plaintext response,
+        or a object of dependencies.
+        Extract source code of contract of interest.
+        """
+
+        if not scan_results:
+            return
+
+        scan_result = scan_results[0]
+        source_code = scan_result.get("SourceCode")
+
+        if not source_code:
+            # Will handle empty, or plaintext responses.
+            return source_code
+
+        contract_name = scan_result["ContractName"] + ".sol"
+
+        source_code = json.loads(
+            source_code.strip(" '").replace("{{", "{").replace("}}", "}")
+        )
+
+        for k, v in source_code["sources"].items():
+            if contract_name in k:
+                return v["content"]
+
+        raise NoSourceCodeError("Unable to parse source code")
 
     async def fetch_contract_source_code_from_explorer(
         self, client: httpx.AsyncClient, address: str, network: NetworkEnum
@@ -48,7 +78,7 @@ class BlockchainService:
             result = data.get("result")
             if result and isinstance(result, list) and len(result) > 0:
                 obj["found"] = True
-                source_code = result[0].get("SourceCode")
+                source_code = self.__parse_source_code(result)
                 if source_code:
                     obj["has_source_code"] = True
                     obj["source_code"] = source_code

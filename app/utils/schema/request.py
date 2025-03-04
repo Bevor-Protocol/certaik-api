@@ -42,7 +42,7 @@ class FilterParams(BaseModel):
     user_id: Optional[str | UUID] = None
     user_address: Optional[str] = None
     page: int = 0
-    page_size: int = 15
+    page_size: int = 20
     search: Optional[str] = Field(default=None, description="search the audit result")
     audit_type: list[AuditTypeEnum] = Field(default_factory=list)
     status: Optional[AuditStatusEnum] = None
@@ -54,7 +54,15 @@ class FilterParams(BaseModel):
     def parse_audit_to_list(cls, value: list[str] | str):
         if not value:
             return []
+        if (
+            isinstance(value, list)
+            and len(value) == 1
+            and isinstance(value[0], str)
+            and "," in value[0]
+        ):
+            return value[0].replace("%2C", ",").split(",")
         if isinstance(value, str):
+            value = value.replace("%2C", ",")
             return value.split(",")
         return value
 
@@ -63,7 +71,15 @@ class FilterParams(BaseModel):
     def parse_network_to_list(cls, value: list[str] | str):
         if not value:
             return []
+        if (
+            isinstance(value, list)
+            and len(value) == 1
+            and isinstance(value[0], str)
+            and "," in value[0]
+        ):
+            return value[0].replace("%2C", ",").split(",")
         if isinstance(value, str):
+            value = value.replace("%2C", ",")
             return value.split(",")
         return value
 

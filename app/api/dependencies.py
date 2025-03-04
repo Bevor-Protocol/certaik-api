@@ -63,14 +63,15 @@ class Authentication:
         user_id = None
 
         if auth.client_type == ClientTypeEnum.APP:
-            credit_consumer_user_id = app.owner.id
             app_id = app.id
-            user_id = app.owner.id if not is_delegated else user_identifier
             if app.type == AppTypeEnum.FIRST_PARTY:
                 consumes_credits = False
                 role = RoleEnum.APP_FIRST_PARTY
+                user_id = user_identifier
             else:
                 role = RoleEnum.APP
+                credit_consumer_user_id = app.owner.id
+                user_id = app.owner.id if not is_delegated else user_identifier
         else:
             credit_consumer_user_id = user.id
             role = RoleEnum.USER
@@ -170,14 +171,15 @@ class AuthenticationWithoutDelegation:
         user_id = None
 
         if auth.client_type == ClientTypeEnum.APP:
-            credit_consumer_user_id = app.owner.id
             app_id = app.id
-            user_id = app.owner.id
             if app.type == AppTypeEnum.FIRST_PARTY:
                 consumes_credits = False
                 role = RoleEnum.APP_FIRST_PARTY
+
             else:
                 role = RoleEnum.APP
+                credit_consumer_user_id = app.owner.id
+                user_id = app.owner.id
         else:
             credit_consumer_user_id = user.id
             role = RoleEnum.USER
