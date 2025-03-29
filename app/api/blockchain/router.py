@@ -5,14 +5,11 @@ from app.api.dependencies import Authentication
 from app.utils.types.enums import RoleEnum
 
 
-class BlockchainRouter:
+class BlockchainRouter(APIRouter):
     def __init__(self):
-        super().__init__()
-        self.router = APIRouter(prefix="/blockchain", include_in_schema=False)
-        self.register_routes()
+        super().__init__(prefix="/blockchain", include_in_schema=False)
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "/gas",
             self.get_gas,
             methods=["GET"],

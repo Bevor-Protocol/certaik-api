@@ -12,14 +12,11 @@ from app.utils.types.enums import ClientTypeEnum, RoleEnum, TransactionTypeEnum
 logger = get_logger("api")
 
 
-class AuthRouter:
+class AuthRouter(APIRouter):
     def __init__(self):
-        super().__init__()
-        self.router = APIRouter(prefix="/auth", include_in_schema=False)
-        self.register_routes()
+        super().__init__(prefix="/auth", include_in_schema=False)
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "/{client_type}",
             self.generate_api_key,
             methods=["POST"],
@@ -28,7 +25,7 @@ class AuthRouter:
             ],
             include_in_schema=False,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/sync/credits",
             self.sync_credits,
             methods=["POST"],

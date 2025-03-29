@@ -8,18 +8,16 @@ from tortoise import Tortoise
 from app.config import redis_settings
 
 
-class BaseRouter:
+class BaseRouter(APIRouter):
     def __init__(self):
-        self.router = APIRouter(include_in_schema=False)
-        self.register_routes()
+        super().__init__(include_in_schema=False)
 
-    def register_routes(self):
-        self.router.add_api_route("/", self.read_root, methods=["GET"])
-        self.router.add_api_route("/health", self.health_check, methods=["GET"])
-        self.router.add_api_route("/metrics", self.get_metrics, methods=["GET"])
-        self.router.add_api_route("/test", self.test, methods=["GET"])
-        self.router.add_api_route("/docs", self.redoc, methods=["GET"])
-        self.router.add_api_route("/redoc", self.redirect_to_docs, methods=["GET"])
+        self.add_api_route("/", self.read_root, methods=["GET"])
+        self.add_api_route("/health", self.health_check, methods=["GET"])
+        self.add_api_route("/metrics", self.get_metrics, methods=["GET"])
+        self.add_api_route("/test", self.test, methods=["GET"])
+        self.add_api_route("/docs", self.redoc, methods=["GET"])
+        self.add_api_route("/redoc", self.redirect_to_docs, methods=["GET"])
 
     async def read_root(self):
         return {"Hello": "World"}

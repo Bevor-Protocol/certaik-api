@@ -15,13 +15,11 @@ from app.utils.types.enums import RoleEnum
 from .openapi import GET_APP_INFO
 
 
-class AppRouter:
+class AppRouter(APIRouter):
     def __init__(self):
-        self.router = APIRouter(prefix="/app", tags=[APP_TAG])
-        self.register_routes()
+        super().__init__(prefix="/app", tags=[APP_TAG])
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "",
             self.upsert_app,
             methods=["POST", "PATCH"],
@@ -31,7 +29,7 @@ class AppRouter:
             operation_id="upsert_app",
             include_in_schema=False,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/info",
             self.get_app_info,
             methods=["GET"],
@@ -40,7 +38,7 @@ class AppRouter:
             ],
             **GET_APP_INFO
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/stats",
             self.get_stats,
             methods=["GET"],

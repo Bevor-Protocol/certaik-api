@@ -17,21 +17,18 @@ secret = os.getenv("SHARED_SECRET")
 logger = get_logger("websocket")
 
 
-class WebsocketRouter:
+class WebsocketRouter(APIRouter):
     HEARTBEAT_INTERVAL = 5
 
     def __init__(self):
-        self.router = APIRouter(include_in_schema=False)
+        super().__init__(include_in_schema=False)
         self.active_connections: list[WebSocket] = []
         self.pending_jobs: dict[str, WebSocket] = {}
         self.inverse_jobs: defaultdict[WebSocket, List[str]] = defaultdict(list)
         self.heartbeat_check = {}
         self.pubsub_task = None
 
-        self.register_routes()
-
-    def register_routes(self):
-        self.router.add_websocket_route("/ws", self.websocket)
+        self.add_websocket_route("/ws", self.websocket)
 
     async def websocket(self, websocket: WebSocket):
         try:

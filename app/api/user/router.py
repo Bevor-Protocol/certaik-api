@@ -13,13 +13,11 @@ from app.utils.types.enums import RoleEnum
 from .openapi import GET_OR_CREATE_USER, GET_USER_INFO
 
 
-class UserRouter:
+class UserRouter(APIRouter):
     def __init__(self):
-        self.router = APIRouter(prefix="/user", tags=[USER_TAG])
-        self.register_routes()
+        super().__init__(prefix="/user", tags=[USER_TAG])
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "",
             self.get_or_create_user,
             methods=["POST"],
@@ -28,7 +26,7 @@ class UserRouter:
             ],
             **GET_OR_CREATE_USER,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/info",
             self.get_user_info,
             methods=["GET"],

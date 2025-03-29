@@ -9,13 +9,11 @@ from app.utils.types.enums import RoleEnum
 from .openapi import GET_COST_ESTIMATE
 
 
-class PlatformRouter:
+class PlatformRouter(APIRouter):
     def __init__(self):
-        self.router = APIRouter(prefix="/platform", tags=[PLATFORM_TAG])
-        self.register_routes()
+        super().__init__(prefix="/platform", tags=[PLATFORM_TAG])
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "/cost-estimate",
             self.get_credit_estimate,
             methods=["GET"],

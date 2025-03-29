@@ -22,14 +22,11 @@ from app.utils.types.enums import AuthScopeEnum, ClientTypeEnum, RoleEnum
 logger = get_logger("api")
 
 
-class AdminRouter:
+class AdminRouter(APIRouter):
     def __init__(self):
-        super().__init__()
-        self.router = APIRouter(prefix="/admin", include_in_schema=False)
-        self.register_routes()
+        super().__init__(prefix="/admin", include_in_schema=False)
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "/status",
             self.is_admin,
             methods=["GET"],
@@ -37,7 +34,7 @@ class AdminRouter:
                 Depends(Authentication(required_role=RoleEnum.APP_FIRST_PARTY))
             ],
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/search/app",
             self.search_apps,
             methods=["GET"],
@@ -50,7 +47,7 @@ class AdminRouter:
                 )
             ],
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/search/user",
             self.search_users,
             methods=["GET"],
@@ -63,7 +60,7 @@ class AdminRouter:
                 )
             ],
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/permissions/{client_type}/{id}",
             self.update_permissions,
             methods=["POST"],
@@ -76,7 +73,7 @@ class AdminRouter:
                 )
             ],
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/prompts",
             self.get_prompts,
             methods=["GET"],
@@ -89,7 +86,7 @@ class AdminRouter:
                 )
             ],
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/prompt/{id}",
             self.update_prompt,
             methods=["PATCH"],
@@ -102,7 +99,7 @@ class AdminRouter:
                 )
             ],
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/prompt",
             self.add_prompt,
             methods=["POST"],

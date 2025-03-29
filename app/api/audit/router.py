@@ -29,13 +29,11 @@ from .openapi import (
 )
 
 
-class AuditRouter:
+class AuditRouter(APIRouter):
     def __init__(self):
-        self.router = APIRouter(prefix="/audit", tags=[AUDIT_TAG])
-        self.register_routes()
+        super().__init__(prefix="/audit", tags=[AUDIT_TAG])
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "",
             self.create_audit,
             methods=["POST"],
@@ -45,28 +43,28 @@ class AuditRouter:
             ],
             **CREATE_AUDIT,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/list",
             self.list_audits,
             methods=["GET"],
             dependencies=[Depends(Authentication(required_role=RoleEnum.USER))],
             **GET_AUDITS,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/{id}",
             self.get_audit,
             methods=["GET"],
             dependencies=[Depends(Authentication(required_role=RoleEnum.USER))],
             **GET_AUDIT,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/{id}/status",
             self.get_audit_status,
             methods=["GET"],
             dependencies=[Depends(Authentication(required_role=RoleEnum.USER))],
             **GET_AUDIT_STATUS,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/{id}/feedback",
             self.submit_feedback,
             methods=["POST"],

@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from tortoise.contrib.fastapi import register_tortoise
 
-import app.api.urls as routers
 from app.api.middlewares import PrometheusMiddleware
+from app.api.urls import router
 from app.config import TORTOISE_ORM
 from app.openapi import OPENAPI_SCHEMA
 
@@ -51,13 +51,5 @@ register_tortoise(
 
 app.add_middleware(PrometheusMiddleware)
 
-app.include_router(routers.admin_router)
-app.include_router(routers.app_router)
-app.include_router(routers.audit_router)
-app.include_router(routers.auth_router)
-app.include_router(routers.base_router)
-app.include_router(routers.blockchain_router)
-app.include_router(routers.contract_router)
-app.include_router(routers.platform_router)
-app.include_router(routers.user_router)
+app.include_router(router)
 # app.include_router(routers.websocket_router) # exclude in favor of polling

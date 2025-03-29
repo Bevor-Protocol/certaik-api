@@ -15,14 +15,11 @@ from app.utils.types.enums import RoleEnum, TransactionTypeEnum
 from .openapi import GET_CONTRACT, GET_OR_CREATE_CONTRACT
 
 
-class ContractRouter:
+class ContractRouter(APIRouter):
     def __init__(self):
-        super().__init__()
-        self.router = APIRouter(prefix="/contract", tags=[CONTRACT_TAG])
-        self.register_routes()
+        super().__init__(prefix="/contract", tags=[CONTRACT_TAG])
 
-    def register_routes(self):
-        self.router.add_api_route(
+        self.add_api_route(
             "",
             self.upload_contract,
             methods=["POST"],
@@ -31,7 +28,7 @@ class ContractRouter:
             ],
             **GET_OR_CREATE_CONTRACT,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/{id}",
             self.get_contract,
             methods=["GET"],
@@ -40,7 +37,7 @@ class ContractRouter:
             ],
             **GET_CONTRACT,
         )
-        self.router.add_api_route(
+        self.add_api_route(
             "/token/static",
             self.process_token,
             methods=["POST"],
